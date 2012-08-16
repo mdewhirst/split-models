@@ -69,10 +69,8 @@ aggregate = False   # aggregate imports from the same module
 topline = 'from __future__ import absolute_import\n# -*- coding: utf-8 -*-\n\n'
 startline = 3 # start inserting import lines into .py files below topline
 
-IMPORT = 'import'
 MODEL = 'models.Model'
 OBJ = '.objects'
-CLASS = 'class'
 
 class Exploder(object):
 
@@ -162,7 +160,7 @@ class Exploder(object):
                 break
             module = ''
             item = ''
-            if IMPORT in line:
+            if 'import' in line:
                 line2 = ''
                 line = line.rstrip()
                 while line.endswith('\\'):
@@ -180,7 +178,7 @@ class Exploder(object):
                     item = item.replace(',', '')
                     self.addimport(module, item)
                     line = 'skip'
-            elif CLASS in line and MODEL in line:
+            elif 'class' in line and MODEL in line:
                 klass = line.split('(')[0].split()[-1]
                 # will need to be imported so gets a leading dot
                 module = '.%s' % klass.lower()
