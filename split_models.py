@@ -54,7 +54,7 @@ Constants which appear in the models.py file need to be imported from somewhere
 or they get omitted from the split-out files. A convenient spot is inside the
 <app>/__init__.py file so they can be ... from <app> import CONST1, CONST2 etc
 
-I had to write a "seemsok" method to detect names embedded within other methods
+I had to write a "seemsok" method to detect names embedded within other names
 
 """
 
