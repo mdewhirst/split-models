@@ -155,7 +155,6 @@ class Exploder(object):
 
 
     def fillinit(self):
-        i = 0
         self.fbak.seek(0)
         while True:
             line = self.fbak.readline()
@@ -271,14 +270,8 @@ class Exploder(object):
             classpy = open(pyfile, 'r')
             lines = classpy.readlines()
             lines.insert(2, '\n')
-            #print('%s %s' % (type(lines), len(lines)))
             classpy.close()
             froms = list()
-            Qs = '"""'
-            qs = "'''"
-            comment = False
-            komment = False
-            helptext = False
             for line in lines:
                 prefix = ''
                 if 'ForeignKey' in line or 'OneToOneField' in line \
@@ -288,7 +281,6 @@ class Exploder(object):
                     paren = False
                     comma = False
                     first, second = line.split('(', 1)
-                    # the target model is at the front of second
                     if not 'self' in second:    # do nothing if it is
                         if ',' in second:       # some options exist
                             second, third = second.split(',', 1)
