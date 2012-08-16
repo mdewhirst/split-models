@@ -369,7 +369,7 @@ if __name__ == '__main__':
     for line in exp.fsrc.readlines():
         if "def __unicode__(self):" in line and not meta:
             exp.writemeta(classpy, classname, True)
-        if line[0:5] == 'class' and 'models.Model' in line:
+        if line[0:5] == 'class' and MODEL in line:
             # still on the old class at this point
             # patch in the froms at the top and close classpy
             exp.writemodelfile(classpy)
