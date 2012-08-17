@@ -64,9 +64,9 @@ I had to write a "seemsok" method to detect names embedded within other names
 
 import os
 
-app = 'substance'
+app = 'abc'
 home = '/users/miked/py'
-project = 'ssds'
+project = 'xyz'
 
 aggregate = False   # aggregate imports from the same module
 
