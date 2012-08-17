@@ -14,6 +14,10 @@ Author = Mike Dewhirst 16 Aug 2012
 Python = 2.7
 Django = 1.4
 
+17 Aug 2012     Adjusted self.writemeta() to stop inserting db_table and
+                generated topline from models.py. Thanks Melvyn Sopacua
+
+
 There are no unit tests for this. Run your own app unit tests prior to running
 this script and again afterwards. That constitutes the essential testing. This
 is a script which is intended to be run once per app then thrown away.
@@ -60,13 +64,12 @@ I had to write a "seemsok" method to detect names embedded within other names
 
 import os
 
-app = 'abc'
+app = 'substance'
 home = '/users/miked/py'
-project = 'xyz'
+project = 'ssds'
 
 aggregate = False   # aggregate imports from the same module
 
-topline = 'from __future__ import absolute_import\n# -*- coding: utf-8 -*-\n\n'
 startline = 3 # start inserting import lines into .py files below topline
 
 MODEL = 'models.Model'
@@ -74,11 +77,10 @@ OBJ = '.objects'
 
 class Exploder(object):
 
-    def __init__(self, home=home, project=project, app=app, topline=topline,
+    def __init__(self, home=home, project=project, app=app,
                                         startline=startline, indent='    '):
         monolith = os.path.join(home, project, app, 'models.py')
         self.app = app
-        self.topline = topline
         self.startline = startline
         self.indent = indent
 
@@ -91,15 +93,39 @@ class Exploder(object):
         if not os.path.isdir(self.modelspath):
             os.mkdir(self.modelspath)
         self.imports = dict()
-        self.finit = open(self.init, 'w')
-        self.finit.write(self.topline)
         self.initlines = list()
         self.init__all = list()
         with open(self.bak, 'r') as self.fbak:
+            self.topline = self.maketopline()
+            self.fbak.seek(0)
+            self.finit = open(self.init, 'w')
+            self.finit.write(self.topline)
             with open(self.sans, 'w') as self.fsans:
                 self.fillinit()
         self.fsrc = open(self.sans, 'r')
         self.thismodule = None
+
+
+    def maketopline(self):
+        """
+        Because this is Django 1.4 and Python 2.7 we need the first line in
+        every model file (which uses absolute import) to be from future import
+        absolute
+        """
+        futur_ = 'from __future__ import'
+        abs_imp = 'absolute_import'
+        future = '%s %s' % (futur_, abs_imp)
+        coding = '# -*- coding: utf-8 -*-'
+        line1 = self.fbak.readline().strip()
+        line2 = self.fbak.readline().strip()
+        if 'coding:' in line1:
+            coding = line1
+        elif 'coding:' in line2:
+            coding = line2
+        if futur_ in line1 and not abs_imp in line1:
+            future = '%s, %s' % (line1, abs_imp)
+        return '%s\n%s\n\n' % (future, coding)
+
 
 
     def addimport(self, module, item):
@@ -240,8 +266,6 @@ class Exploder(object):
             classpy.write('%sclass Meta:\n' % self.indent)
         classpy.write("%s%sapp_label = '%s'\n" % (self.indent, self.indent,
                                                   self.app))
-        classpy.write("%s%sdb_table = '%s_%s'\n%s" % (self.indent, self.indent,
-                                                  self.app, self.thismodule, xtra, ))
 
 
     def writemodelfile(self, classpy=None):
@@ -335,8 +359,9 @@ class Exploder(object):
 
             clean = list()
             for item in froms:
-                if not item in clean:
-                    clean.insert(0, item)
+                if not '__future__' in item:
+                    if not item in clean:
+                        clean.insert(0, item)
             cleaner = self.removethismodule(clean)
             del(clean)
             cleaner.sort()
@@ -355,7 +380,7 @@ class Exploder(object):
 
 if __name__ == '__main__':
 
-    exp = Exploder(home, project, app, topline, startline)
+    exp = Exploder(home, project, app, startline)
 
     meta = True         # otherwise write out a class Meta: line
     classpy = None      # the opened class py file in 'w' mode
