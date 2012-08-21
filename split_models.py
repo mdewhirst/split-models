@@ -17,6 +17,7 @@ Django = 1.4
 17 Aug 2012     Adjusted self.writemeta() to stop inserting db_table and
                 generated topline from models.py. Thanks Melvyn Sopacua
 
+21 Aug 2012     Extra '\n' in writemeta
 
 There are no unit tests for this. Run your own app unit tests prior to running
 this script and again afterwards. That constitutes the essential testing. This
@@ -264,8 +265,8 @@ class Exploder(object):
         if meta:
             xtra = '\n'
             classpy.write('%sclass Meta:\n' % self.indent)
-        classpy.write("%s%sapp_label = '%s'\n" % (self.indent, self.indent,
-                                                  self.app))
+        classpy.write("%s%sapp_label = '%s'%s\n" % (self.indent, self.indent,
+                                                  self.app, xtra))
 
 
     def writemodelfile(self, classpy=None):
